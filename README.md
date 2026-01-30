@@ -74,37 +74,62 @@ jupyter notebook Binary_Classification_DermaMNIST.ipynb
 
 ## ⚙️ Configuration
 
-### Environment Variables (Set in Notebook)
+All configuration options are located in a **dedicated Configuration cell** at the top of the notebook. Adjust these settings before running.
+
+### Quick Setup Table
+
+| Your Environment | `USE_COLAB` | `USE_WANDB` | `USE_DRIVE` |
+|------------------|-------------|-------------|-------------|
+| **Google Colab** (recommended) | `True` | `True` or `False` | `True` or `False` |
+| **Local Jupyter/VS Code** | `False` | `True` or `False` | `False` |
+
+### Configuration Options
 
 ```python
-# ============================================================================
-# CONFIGURATION - Modify these settings as needed
-# ============================================================================
-USE_COLAB = True      # Set to False for local execution
-USE_WANDB = True      # Set to False to disable experiment tracking
-USE_DRIVE = True      # Set to False to save models locally (Colab only)
-SEED = 42             # Random seed for reproducibility
+# ═══════════════════════════════════════════════════════════════════
+#                         CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+
+# ENVIRONMENT
+USE_COLAB = True      # True = Google Colab, False = Local machine
+USE_WANDB = True      # True = Enable experiment tracking, False = Disable
+USE_DRIVE = True      # True = Save to Google Drive, False = Save locally
+
+# REPRODUCIBILITY  
+SEED = 42             # Random seed (don't change for reproducibility)
+
+# PHASE 3 (Update after Phase 2)
+FINAL_MODEL_NAME = 'P2_resnet50_Freeze20_W3'  # Your best model from Phase 2
 ```
 
-### Weights & Biases (Optional)
+### Detailed Explanations
 
-W&B provides experiment tracking and visualization. To enable:
+| Variable | Options | Description |
+|----------|---------|-------------|
+| `USE_COLAB` | `True` / `False` | Set `True` if running in Google Colab. Set `False` for local environments (Jupyter, VS Code). |
+| `USE_WANDB` | `True` / `False` | Set `True` to log experiments to [Weights & Biases](https://wandb.ai) (free account required). Set `False` to skip tracking. |
+| `USE_DRIVE` | `True` / `False` | Set `True` to save models to Google Drive (persistent). Set `False` to save to local folder `./DermaMNIST_Study/`. Only works when `USE_COLAB=True`. |
+| `SEED` | Integer | Random seed for reproducibility. Default `42`. |
+| `FINAL_MODEL_NAME` | String | Name of your best model from Phase 2. Update this before running Phase 3. |
 
-1. Create free account at [wandb.ai](https://wandb.ai)
-2. Get your API key from [wandb.ai/settings](https://wandb.ai/settings)
-3. Set `USE_WANDB = True` in the notebook
-4. When prompted, paste your API key
+### Weights & Biases Setup (Optional)
 
-To disable tracking: Set `USE_WANDB = False`
+If you set `USE_WANDB = True`:
+
+1. Create a free account at [wandb.ai](https://wandb.ai)
+2. When you run the notebook, you'll see a login prompt
+3. Click the link, copy your API key, and paste it
+
+If you don't want to use W&B, simply set `USE_WANDB = False`.
 
 ### GPU Requirements
 
-| Environment | GPU Setup |
-|-------------|-----------|
-| **Colab** | Runtime → Change runtime type → GPU (T4 recommended) |
-| **Local** | NVIDIA GPU with CUDA support + cuDNN |
+| Environment | How to Enable GPU |
+|-------------|-------------------|
+| **Google Colab** | `Runtime` → `Change runtime type` → `GPU` (T4 recommended) |
+| **Local** | Requires NVIDIA GPU with CUDA + cuDNN installed |
 
-> ⚠️ Training without GPU will be significantly slower (~10x)
+> ⚠️ **Warning:** Training without GPU will be ~10x slower!
 
 ---
 
