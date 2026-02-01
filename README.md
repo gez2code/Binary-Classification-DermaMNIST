@@ -23,7 +23,8 @@ Maximize **recall (sensitivity)** for malignant lesion detection to minimize mis
 
 ## 🚀 Quick Start (Recommended: Google Colab)
 
-> ⚠️ **For Reviewers:** Please use Google Colab for reproducibility. All configurations are hardcoded.
+> ⚠️ **For Reviewers:** Please use Google Colab for reproducibility. All configurations are hardcoded. In General it is possible to run the script from top to buttom.
+Limitation in RAM may occure due to workload.
 
 ### Step-by-Step Instructions
 
