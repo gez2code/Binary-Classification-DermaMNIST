@@ -5,7 +5,9 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow 2.10+](https://img.shields.io/badge/TensorFlow-2.10+-orange.svg)](https://www.tensorflow.org/)
 
-Binary classification of skin lesions (Malignant vs Benign) using deep learning with transfer learning approaches.
+Binary classification of skin lesions (Malignant vs Benign) using deep learning on the DermaMNIST dataset.
+
+**Course:** Deep Learning | **Semester:** Autumn 25/26 | **University:** UNICAM
 
 ---
 
@@ -16,6 +18,40 @@ Maximize **recall (sensitivity)** for malignant lesion detection to minimize mis
 **Why Recall?** In medical diagnosis:
 - **False Negative** (missed cancer) → Potentially fatal
 - **False Positive** (unnecessary biopsy) → Inconvenient but safe
+
+---
+
+## 🚀 Quick Start (Recommended: Google Colab)
+
+> ⚠️ **For Reviewers:** Please use Google Colab for reproducibility. All configurations are hardcoded.
+
+### Step-by-Step Instructions
+
+1. **Click the "Open in Colab" badge above**
+2. **Enable GPU Runtime:**
+   - Go to `Runtime` → `Change runtime type` → Select `T4 GPU`
+3. **Run all cells sequentially** (`Runtime` → `Run all`)
+4. **Total estimated runtime:** ~45-60 minutes (with T4 GPU)
+
+### Default Configuration (Hardcoded for Reproducibility)
+
+```python
+# ═══════════════════════════════════════════════════════════════════════════
+#                         CONFIGURATION (DO NOT MODIFY)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ENVIRONMENT
+USE_COLAB = True       # Use Google Colab environment
+USE_WANDB = False      # Disabled - no account required for reviewers
+
+# REPRODUCIBILITY (Fixed seed for exact replication)
+SEED = 42
+
+# PROJECT
+PROJECT_NAME = 'DermaMNIST_Binary_Study'
+```
+
+> 💡 **Note:** `USE_WANDB = False` ensures no external account is needed. All metrics are printed and plotted directly in the notebook.
 
 ---
 
@@ -34,81 +70,186 @@ Maximize **recall (sensitivity)** for malignant lesion detection to minimize mis
 
 | Original Class | Binary Label | Clinical Rationale |
 |----------------|--------------|-------------------|
-| Actinic keratoses (akiec) | **Malignant (1)** | Pre-cancerous, can become SCC |
-| Basal cell carcinoma (bcc) | **Malignant (1)** | Most common skin cancer |
 | Melanoma (mel) | **Malignant (1)** | Most dangerous skin cancer |
+| Basal cell carcinoma (bcc) | **Malignant (1)** | Most common skin cancer |
+| Actinic keratoses (akiec) | **Malignant (1)** | Pre-cancerous, can become SCC |
+| Vascular lesions (vasc) | **Malignant (1)** | Can indicate malignancy |
+| Melanocytic nevi (nv) | Benign (0) | Common moles |
 | Benign keratosis (bkl) | Benign (0) | Non-cancerous growth |
 | Dermatofibroma (df) | Benign (0) | Benign fibrous nodule |
-| Melanocytic nevi (nv) | Benign (0) | Common moles |
-| Vascular lesions (vasc) | Benign (0) | Benign blood vessel growths |
 
 ---
 
-## 🚀 Quick Start
+## 📓 Notebook Structure & Runtime Estimates
 
-### Option 1: Google Colab (Recommended)
+Below is a detailed breakdown of each section in the notebook with expected runtimes on a **T4 GPU**.
 
-1. Click the "Open in Colab" badge above
-2. Go to `Runtime` → `Change runtime type` → Select `GPU` (T4)
-3. Run all cells sequentially
+### Overview Table
 
-### Option 2: Local Setup
+| Section | Description | Runtime | GPU Required |
+|---------|-------------|---------|--------------|
+| 1. Setup | Install packages, imports | ~2 min | No |
+| 2. Data Loading | Download & preprocess DermaMNIST | ~1 min | No |
+| 3. Data Exploration | Visualize class distribution | ~30 sec | No |
+| 4. Phase 1 | Architecture screening (14 models) | ~25-30 min | **Yes** |
+| 5. Phase 2 | Hyperparameter tuning (8 experiments) | ~12-15 min | **Yes** |
+| 6. Phase 3 | Final evaluation on test set | ~2 min | Yes |
+| 7. Results | Plots, confusion matrix, analysis | ~1 min | No |
+| **Total** | | **~45-60 min** | |
 
-```bash
-# Clone repository
-git clone https://github.com/gez2code/Binary-Classification-DermaMNIST.git
-cd Binary-Classification-DermaMNIST
+---
 
-# Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or: venv\Scripts\activate  # Windows
+### Detailed Section Descriptions
 
-# Install dependencies
-pip install -r requirements.txt
+#### 1️⃣ Setup & Configuration (~2 minutes)
 
-# Launch notebook
-jupyter notebook Binary_Classification_DermaMNIST.ipynb
+```
+📦 What it does:
+   - Installs required packages (medmnist, tensorflow, etc.)
+   - Sets random seeds for reproducibility
+   - Configures GPU memory growth
+   - Defines helper functions
+
+⚙️ Key outputs:
+   - TensorFlow version confirmation
+   - GPU availability check
+   - "Setup complete" message
+```
+
+#### 2️⃣ Data Loading & Preprocessing (~1 minute)
+
+```
+📦 What it does:
+   - Downloads DermaMNIST from MedMNIST repository
+   - Converts 7-class labels to binary (malignant/benign)
+   - Normalizes pixel values to [0, 1]
+   - Creates train/validation/test splits
+
+⚙️ Key outputs:
+   - Dataset shapes: (7007, 28, 28, 3), (1003, ...), (2005, ...)
+   - Class distribution statistics
+   - "Data loaded successfully" message
+```
+
+#### 3️⃣ Data Exploration (~30 seconds)
+
+```
+📦 What it does:
+   - Visualizes sample images from each class
+   - Plots class distribution (pie chart, bar chart)
+   - Calculates class imbalance ratio
+
+⚙️ Key outputs:
+   - Sample image grid
+   - Class distribution: ~80.5% Benign, ~19.5% Malignant
+   - Imbalance ratio: 4.1:1
+```
+
+#### 4️⃣ Phase 1: Architecture Screening (~25-30 minutes)
+
+```
+📦 What it does:
+   - Trains 14 different model architectures
+   - Uses consistent training protocol (class weights, early stopping)
+   - Evaluates on validation set
+   - Selects winner based on F2 score + lowest FN
+
+⚙️ Models trained:
+   ├── Custom CNN: shallow, deep, wide (3 models, ~3 min each)
+   ├── Hybrid CNN: with/without CBAM (2 models, ~3 min each)
+   ├── MobileNetV2: frozen, partial, full (3 models, ~2 min each)
+   ├── EfficientNetB0: frozen, partial, full (3 models, ~2 min each)
+   └── DenseNet121: frozen, partial, full (3 models, ~2 min each)
+
+⚙️ Key outputs:
+   - Training curves for each model
+   - Validation metrics table
+   - Phase 1 Winner announcement (expected: Hybrid_NoCBAM)
+```
+
+#### 5️⃣ Phase 2: Hyperparameter Tuning (~12-15 minutes)
+
+```
+📦 What it does:
+   - Takes Phase 1 winner (Hybrid_NoCBAM)
+   - Tests 8 hyperparameter configurations
+   - Optimizes dropout, learning rate, class weights
+
+⚙️ Experiments:
+   ├── Dropout: 0.4, 0.6 (2 experiments)
+   ├── Learning rate: 0.001, 0.0003 (2 experiments)
+   ├── Class weights: W4 (1:4), W5 (1:5) (2 experiments)
+   └── Filter sizes: 32, 128 (2 experiments)
+
+⚙️ Key outputs:
+   - Tuning results comparison table
+   - Phase 2 Winner announcement (expected: Hybrid_DR06)
+```
+
+#### 6️⃣ Phase 3: Final Evaluation (~2 minutes)
+
+```
+📦 What it does:
+   - Loads best model from Phase 2
+   - Calibrates decision threshold on validation set
+   - Evaluates on held-out TEST set (first time!)
+   - Generates final metrics
+
+⚙️ Key outputs:
+   - Optimal threshold value
+   - Test set metrics: Recall, Precision, F2, AUC
+   - Confusion matrix
+```
+
+#### 7️⃣ Results & Analysis (~1 minute)
+
+```
+📦 What it does:
+   - Plots final confusion matrix
+   - Generates classification report
+   - Compares all models visually
+   - Provides clinical interpretation
+
+⚙️ Key outputs:
+   - Confusion matrix visualization
+   - ROC curve
+   - Summary statistics
+   - Clinical interpretation text
 ```
 
 ---
 
-## ⚙️ Configuration
+## 📈 Expected Results
 
-All configuration options are located in the **Configuration cell** at the top of the notebook.
+### Final Test Set Performance (Hybrid_DR06, dropout=0.6)
 
-### Quick Setup Table
+| Metric | Value |
+|--------|-------|
+| **Recall (Sensitivity)** | 91.58% (359/392 malignant detected) |
+| **Precision** | 37.95% |
+| **F2 Score** | 0.714 |
+| **AUC** | 0.877 |
+| **False Negatives** | 33 (missed cancers) |
+| **False Positives** | 587 (unnecessary referrals) |
 
-| Your Environment | `USE_COLAB` | `USE_WANDB` | `USE_DRIVE` |
-|------------------|-------------|-------------|-------------|
-| **Google Colab** (recommended) | `True` | `True` or `False` | `True` or `False` |
-| **Local Jupyter/VS Code** | `False` | `True` or `False` | `False` |
+### Confusion Matrix
 
-### Configuration Options
-
-```python
-# ═══════════════════════════════════════════════════════════════════════
-#                         CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════════
-
-# ENVIRONMENT
-USE_COLAB = True      # True = Google Colab, False = Local machine
-USE_WANDB = True      # True = Enable experiment tracking, False = Disable
-USE_DRIVE = True      # True = Save to Google Drive, False = Save locally
-
-# REPRODUCIBILITY  
-SEED = 42             # Random seed (don't change for reproducibility)
-
-# PROJECT
-PROJECT_NAME = 'DermaMNIST_Binary_Study'
+```
+                    Predicted
+                 Benign  Malignant
+Actual Benign     1026      587
+Actual Malignant    33      359
 ```
 
-### Weights & Biases Setup (Optional)
+### Clinical Interpretation
 
-If you set `USE_WANDB = True`:
-1. Create a free account at [wandb.ai](https://wandb.ai)
-2. Add your API key to Colab Secrets (key: `WANDB_API_KEY`)
-3. The notebook will auto-login
+- ✅ **359 of 392 cancers detected** (91.6% sensitivity)
+- ❌ **33 cancers missed** (8.4% false negative rate)
+- ⚠️ **587 false alarms** (36% of benign cases)
+
+**Suitable for:** Screening (triage) applications where missing a cancer is worse than a false alarm.
+
+**Not suitable for:** Final diagnosis (requires dermatologist confirmation).
 
 ---
 
@@ -118,47 +259,58 @@ If you set `USE_WANDB = True`:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  PHASE 1: Architecture Screening (15 experiments)                       │
+│  PHASE 1: Architecture Screening (14 experiments, ~25 min)              │
 │  ├── Custom CNN: 3 variants (shallow, deep, wide)                       │
+│  ├── Hybrid CNN: 2 variants (with/without CBAM)                         │
 │  ├── MobileNetV2: 3 variants (frozen, partial, full)                    │
 │  ├── EfficientNetB0: 3 variants (frozen, partial, full)                 │
-│  ├── DenseNet121: 3 variants (frozen, partial, full)                    │
-│  └── Hybrid CNN + CBAM: Attention mechanism                             │
+│  └── DenseNet121: 3 variants (frozen, partial, full)                    │
 │                                     │                                   │
 │                                     ▼                                   │
-│  PHASE 2: Hyperparameter Tuning [Winner from Phase 1]                   │
-│  ├── Freeze depth optimization                                          │
-│  ├── Dropout regularization                                             │
-│  └── Learning rate tuning                                               │
+│  PHASE 2: Hyperparameter Tuning (8 experiments, ~15 min)                │
+│  ├── Dropout: 0.4, 0.6                                                  │
+│  ├── Learning rate: 0.001, 0.0003                                       │
+│  ├── Class weights: W4, W5                                              │
+│  └── Filter sizes: 32, 128                                              │
 │                                     │                                   │
 │                                     ▼                                   │
-│  PHASE 3: Final Evaluation                                              │
+│  PHASE 3: Final Evaluation (~2 min)                                     │
 │  ├── Threshold calibration on validation set                            │
 │  ├── Test set evaluation (held out until now!)                          │
 │  └── Clinical interpretation                                            │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Architecture Overview
-
-| Architecture | Parameters | Input Size | Description |
-|--------------|------------|------------|-------------|
-| Custom CNN | ~50K-200K | 28×28 | Native resolution, baseline |
-| Hybrid CNN + CBAM | ~300K | 28×28 | Attention mechanism |
-| MobileNetV2 | 3.4M | 56×56 | Lightweight transfer learning |
-| EfficientNetB0 | 5.3M | 56×56 | Efficient compound scaling |
-| DenseNet121 | 8M | 56×56 | Dense connections |
-
-> ❌ **Removed:** ResNet50 (25M), VGG16 (138M) - too large for 28×28 images
-
 ### Key Design Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| **F2 Score as monitor metric** | Weights recall 2x more than precision |
-| **Threshold calibration** | Boost recall while maintaining precision ≥40% |
-| **Class weighting (W3)** | `{0: 1.0, 1: 3.0}` to handle imbalance |
-| **Test set isolation** | No peeking until final evaluation |
+| Decision | Value | Rationale |
+|----------|-------|-----------|
+| **Primary Metric** | F2 Score | Weights recall 2× more than precision |
+| **Class Weights** | {0: 1.0, 1: 3.0} | Addresses 4:1 class imbalance |
+| **Early Stopping** | patience=10 | Prevents overfitting, monitors val_f2 |
+| **Threshold** | 0.55 (calibrated) | Optimized for recall ≥90% |
+| **Seed** | 42 | Ensures reproducibility |
+
+---
+
+## 🛠️ Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `ModuleNotFoundError: medmnist` | Run `!pip install medmnist` |
+| `CUDA out of memory` | Restart runtime, or reduce batch_size to 32 |
+| Very slow training | Check GPU is enabled: `Runtime` → `Change runtime type` → `T4 GPU` |
+| `ResourceExhaustedError` | Restart runtime to clear GPU memory |
+| Different results | Ensure SEED=42 and same TensorFlow version |
+
+### Verify GPU is Enabled
+
+Run this cell to check:
+```python
+import tensorflow as tf
+print("GPU Available:", tf.config.list_physical_devices('GPU'))
+# Should show: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+```
 
 ---
 
@@ -178,55 +330,9 @@ Binary-Classification-DermaMNIST/
 
 ---
 
-## 📈 Results
-
-Results depend on your specific run. The notebook automatically:
-- Selects the best model from Phase 1 based on validation F2 score
-- Fine-tunes hyperparameters in Phase 2
-- Calibrates the decision threshold for optimal recall
-- Evaluates on the held-out test set
-
-### Expected Performance Range
-
-| Metric | Typical Range |
-|--------|---------------|
-| **Recall (Sensitivity)** | 80-90% |
-| **Precision** | 35-50% |
-| **F2 Score** | 0.65-0.75 |
-| **AUC** | 0.80-0.90 |
-
-### Clinical Interpretation
-
-The model prioritizes **minimizing missed cancers** (false negatives) at the cost of some false positives:
-- ✅ **High recall**: Catches most malignant lesions
-- ⚠️ **Lower precision**: Some unnecessary biopsies
-- 🎯 **Clinical value**: Better to over-refer than miss cancer
-
----
-
-## 🛠️ Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| `ModuleNotFoundError: medmnist` | Run `pip install medmnist` |
-| `CUDA out of memory` | Reduce `batch_size` to 32 or 16 |
-| `wandb: permission denied` | Set `USE_WANDB = False` or run `wandb login` |
-| `Drive mount failed` | Set `USE_DRIVE = False` for local saving |
-| Very slow training | Ensure GPU is enabled: `tf.config.list_physical_devices('GPU')` |
-
-### Getting Help
-
-1. Check existing [Issues](https://github.com/gez2code/Binary-Classification-DermaMNIST/issues)
-2. Open a new issue with:
-   - Error message
-   - Environment (Colab/Local, OS, Python version)
-   - Steps to reproduce
-
----
-
 ## 📚 References
 
-- **Dataset**: Yang, J., et al. (2023). MedMNIST v2: A Large-Scale Lightweight Benchmark for 2D and 3D Biomedical Image Classification. [arXiv:2110.14795](https://arxiv.org/abs/2110.14795)
+- **Dataset**: Yang, J., et al. (2023). MedMNIST v2: A Large-Scale Lightweight Benchmark for 2D and 3D Biomedical Image Classification. [Scientific Data](https://doi.org/10.1038/s41597-022-01721-8)
 - **MobileNetV2**: Sandler, M., et al. (2018). MobileNetV2: Inverted Residuals and Linear Bottlenecks. [CVPR 2018](https://arxiv.org/abs/1801.04381)
 - **DenseNet**: Huang, G., et al. (2017). Densely Connected Convolutional Networks. [CVPR 2017](https://arxiv.org/abs/1608.06993)
 - **EfficientNet**: Tan, M., & Le, Q. (2019). EfficientNet: Rethinking Model Scaling. [ICML 2019](https://arxiv.org/abs/1905.11946)
@@ -240,16 +346,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## ✍️ Author
+
+**Abraham Gezehei**  
+📧 abraham.gezehei@studenti.unicam.it  
+🎓 Università di Camerino (UNICAM)  
+📅 Deep Learning Course, Autumn Semester 25/26
+
+**Supervisor:** Prof. Michela Quadrini
+
+---
+
 ## 🙏 Acknowledgments
 
 - [MedMNIST](https://medmnist.com/) for providing the standardized medical imaging dataset
 - [TensorFlow](https://tensorflow.org/) team for the deep learning framework
-- [Weights & Biases](https://wandb.ai/) for experiment tracking tools
-
----
-
-## ✍️ Author
-
-Created as part of a deep learning study on medical image classification.
-
-**Questions?** Open an issue or reach out!
+- [Google Colab](https://colab.research.google.com/) for free GPU access
